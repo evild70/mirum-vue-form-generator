@@ -69,7 +69,8 @@ export default {
 	methods: {
 		// Should field type have a label?
 		fieldTypeHasLabel(field) {
-			if (isNil(field.label)) return false;
+			// if there is no label or it's a radio/checkbox group with a legend
+			if (isNil(field.label) || field.hasLegend) return false;
 
 			let relevantType = "";
 			if (field.type === "input") {
