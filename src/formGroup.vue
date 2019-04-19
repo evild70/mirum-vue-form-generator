@@ -31,7 +31,7 @@
 
 		<div v-show="field.hint" class="hint" v-html="fieldHint(field)"></div>
 
-		<div class="errors help-block" aria-live="assertive">
+		<div class="errors help-block" role="alert">
 			<span v-for="(error, index) in fieldErrors(field)" :key="index" v-html="error"></span>
 		</div>
 	</div>
