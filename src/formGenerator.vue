@@ -8,7 +8,8 @@
 					:errors="errors"
 					:model="model"
 					:options="options"
-					@validated="onFieldValidated" @model-updated="onModelUpdated"
+					@validated="onFieldValidated"
+					@model-updated="onModelUpdated"
 					:key="index">
 				</form-group>
 			</template>
@@ -23,7 +24,8 @@
 						:errors="errors"
 						:model="model"
 						:options="options"
-						@validated="onFieldValidated" @model-updated="onModelUpdated"
+						@validated="onFieldValidated"
+						@model-updated="onModelUpdated"
 						:key="index">
 					</form-group>
 				</template>
