@@ -1,5 +1,5 @@
 <template>
-	<div class="form-group test" :class="getFieldRowClasses(field)">
+	<div class="form-group" :class="getFieldRowClasses(field)">
 		<label v-if="fieldTypeHasLabel(field)" :for="getFieldID(field)" :class="field.labelClasses">
 			<span v-html="field.label"></span>
 			<span v-if='field.help' class="help">
@@ -65,6 +65,9 @@ export default {
 				return [];
 			}
 		}
+	},
+	beforeDestroy() {
+		console.log("formGroup beforeDestroy");
 	},
 	methods: {
 		// Should field type have a label?

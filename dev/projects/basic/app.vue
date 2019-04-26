@@ -29,7 +29,7 @@ export default {
 			model: {
 				first_name: "",
 				last_name: "Higgins",
-				status: true
+				status: false
 			},
 
 			schema: {
@@ -46,38 +46,22 @@ export default {
 						type: "checkbox",
 						label: "Active",
 						model: "status",
-						attributes: {
-							input: {
-								"data-toggle": "tooltip"
-							}
-						}
+
 					},
 					{
 						type: "input",
-						inputType: "color",
+						inputType: "text",
 						label: "Color",
 						model: "color",
-						attributes: {
-							input: {
-								"data-target": "tooltip"
-							}
+						visible: function() {
+							return this.model && this.model.status;
 						}
 					},
 					{
 						type: "submit",
 						buttonText: "Change Previous Type",
-						attributes: {
-							input: {
-								"data-target": "toggle"
-							}
-						},
 						onSubmit: () => {
-							// this.schema.fields[2].type = "input";
-							if (this.schema.fields[2].inputType === "color") {
-								this.schema.fields[2].inputType = "text";
-							} else {
-								this.schema.fields[2].inputType = "color";
-							}
+
 						}
 					}
 				]
