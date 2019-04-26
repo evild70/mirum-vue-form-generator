@@ -66,9 +66,6 @@ export default {
 			}
 		}
 	},
-	beforeDestroy() {
-		console.log("formGroup beforeDestroy");
-	},
 	methods: {
 		// Should field type have a label?
 		fieldTypeHasLabel(field) {

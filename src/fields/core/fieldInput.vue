@@ -187,10 +187,6 @@ export default {
 		if (this.schema.inputType.toLowerCase() === "file") {
 			console.warn("The 'file' type in input field is deprecated. Use 'file' field instead.");
 		}
-	},
-
-	beforeDestroy() {
-		console.log("fieldInput beforeDestroy");
 	}
 };
 </script>
