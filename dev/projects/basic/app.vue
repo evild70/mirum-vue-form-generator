@@ -1,5 +1,6 @@
 <template>
 	<div class="container">
+		<p>&nbsp;</p>
 		<h1>Basic</h1>
 		<div class="row">
 			<div class="col-sm-12">
@@ -28,7 +29,7 @@ export default {
 
 			model: {
 				first_name: "",
-				last_name: "Higgins",
+				last_name: "",
 				status: false
 			},
 
@@ -40,7 +41,21 @@ export default {
 						label: "First Name",
 						model: "first_name",
 						required: true,
-						validator: "string"
+						validator: "string",
+						help: "This is help text."
+					},
+					{
+						type: "input",
+						inputType: "text",
+						label: "Last Name",
+						model: "last_name",
+						required: true,
+						validator: "string",
+						tooltip: {
+							header: "Tooltip title top",
+							body: "Tooltip description will go right here, but keep it reasonable."
+						},
+						help: "This is help text."
 					},
 					{
 						type: "checkbox",
@@ -101,4 +116,5 @@ export default {
 
 <style lang="scss">
 @import "../../style.scss";
+@import "../../unity.scss";
 </style>
