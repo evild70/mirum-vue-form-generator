@@ -3,7 +3,7 @@
 		<button v-if="field.tooltip"
 			class="u-reset-button u-color-blue-digital"
 			tabindex="0"
-			role="button"
+			type="button"
 			data-toggle="popover"
 			data-trigger="focus"
 			data-placement="top"
