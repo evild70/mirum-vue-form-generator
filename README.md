@@ -198,6 +198,15 @@ or
 npm run ci
 ```
 
+## Tagging
+1. Change version in `package.json` and `package-lock.json`
+2. BUILD!
+3. Push changes to origin
+4. Go to `Releases`
+5. Click `Draft a new release`
+6. Increase tag version (`v1.0.9`)
+7. Click `Publish release`
+
 ### Public Custom Fields
 
 * [vue-tel-input](https://github.com/EducationLink/vue-tel-input) - International Telephone Input Boilerplate with Vue (integrated with VueFormGenerator).
