@@ -7,6 +7,7 @@
 			data-toggle="popover"
 			data-trigger="focus"
 			data-placement="top"
+			:aria-label="tooltipAriaLabel(field.tooltip.header)"
 			:title="field.tooltip.header"
 			:data-content="field.tooltip.body"
 		>
@@ -141,6 +142,9 @@ export default {
 			if (this.$refs.child) {
 				return this.$refs.child.clearValidationErrors();
 			}
+		},
+		tooltipAriaLabel(header) {
+			return `${header} tooltip`;
 		}
 	}
 };
