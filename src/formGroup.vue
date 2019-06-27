@@ -81,8 +81,8 @@ export default {
 	methods: {
 		// Should field type have a label?
 		fieldTypeHasLabel(field) {
-			// if there is no label or it's a radio or checkbox
-			if (isNil(field.label) || field.type === "dtlcheckbox" || field.type === "dtlradio") return false;
+			// if there is no label or it's a radio or checkbox from DTL
+			if (isNil(field.label) || /dtl(checkbox|radio)/gi.test(field.type)) return false;
 
 			let relevantType = "";
 			if (field.type === "input") {
