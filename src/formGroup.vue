@@ -7,7 +7,7 @@
 			data-toggle="popover"
 			data-trigger="focus"
 			data-placement="top"
-			:aria-label="tooltipAriaLabel(field.tooltip.header)"
+			aria-label="Tool tip"
 			:title="field.tooltip.header"
 			:data-content="field.tooltip.body"
 		>
