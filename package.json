@@ -1,6 +1,6 @@
 {
   "name": "mirum-vue-form-generator",
-  "version": "1.0.10",
+  "version": "1.0.11",
   "description": "Forked from vue-generators/vue-form-generator - A schema-based form generator component for Vue.js",
   "homepage": "https://github.com/evild70/mirum-vue-form-generator",
   "main": "dist/vfg.js",
