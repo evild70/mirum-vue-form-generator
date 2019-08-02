@@ -11,6 +11,7 @@
 			aria-label="Tool tip"
 			:title="field.tooltip.header"
 			:data-content="field.tooltip.body"
+			:data-has-image="field.tooltip.hasImage"
 		>
 			<span class="o-svg-icon o-svg-icon--xl">
 				<svg viewBox="0, 0, 24, 24" focusable="false" role="presentation" shape-rendering="geometricPrecision">
