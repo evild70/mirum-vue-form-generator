@@ -50,7 +50,7 @@
 					</a>
 				</li>
 			</ul>
-			<div>
+			<div class="u-p-t">
 				<fieldset
 					v-for="(step, stepindex) in steps"
 					v-show="activeStep === stepindex"
@@ -79,7 +79,7 @@
 						name="nextStep"
 						@click="goToNextStep(stepindex)"
 					>
-						{{ schema.nextButtonText }}
+						{{ schema.nextButtonText || 'Next' }}
 					</button>
 				</fieldset>
 			</div>
