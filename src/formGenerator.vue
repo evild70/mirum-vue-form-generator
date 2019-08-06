@@ -14,6 +14,7 @@
 				</form-group>
 			</template>
 		</fieldset>
+		<!-- Groups -->
 		<template v-for="(group, groupidx) in groups">
 			<fieldset :is="tag" :class="getFieldRowClasses(group)" :key="groupidx">
 				<legend v-if="group.legend">{{ group.legend }}</legend>
@@ -30,6 +31,58 @@
 					</form-group>
 				</template>
 			</fieldset>
+		</template>
+		<!-- Steps -->
+		<template v-if="steps">
+			<ul class="c-tab c-tab--step">
+				<li
+					v-for="(step, stepindex) in steps"
+					:key="stepindex"
+					class="c-tab__item"
+				>
+					<a
+						href="#"
+						:class="{ 'c-tab__tab': true, 'active': activeStep === stepindex, 'disabled': stepindex > canStepTo }"
+						role="tab"
+						@click.prevent="setActiveStep(stepindex)"
+					>
+						{{ step.title }}
+					</a>
+				</li>
+			</ul>
+			<div>
+				<fieldset
+					v-for="(step, stepindex) in steps"
+					v-show="activeStep === stepindex"
+					:is="tag"
+					:class="getFieldRowClasses(step)"
+					:key="stepindex"
+					:aria-hidden="activeStep !== stepindex"
+					role="tabpanel"
+				>
+					<template v-for="(field, index) in step.fields">
+						<form-group v-if="fieldVisible(field)"
+							:vfg="vfg"
+							:field="field"
+							:errors="errors"
+							:model="model"
+							:options="options"
+							@validated="onFieldValidated"
+							@model-updated="onModelUpdated"
+							:key="index">
+						</form-group>
+					</template>
+					<button
+						v-if="stepindex !== steps.length - 1"
+						class="c-button c-button--primary"
+						type="button"
+						name="nextStep"
+						@click="goToNextStep(stepindex)"
+					>
+						{{ schema.nextButtonText }}
+					</button>
+				</fieldset>
+			</div>
 		</template>
 	</div>
 </template>
@@ -83,6 +136,8 @@ export default {
 	data() {
 		return {
 			vfg: this,
+			activeStep: 0,
+			canStepTo: 0,
 			errors: [] // Validation errors
 		};
 	},
@@ -103,6 +158,16 @@ export default {
 			if (this.schema && this.schema.groups) {
 				forEach(this.schema.groups.slice(0), group => {
 					res.push(group);
+				});
+			}
+
+			return res;
+		},
+		steps() {
+			let res = [];
+			if (this.schema && this.schema.steps) {
+				forEach(this.schema.steps.slice(0), step => {
+					res.push(step);
 				});
 			}
 
@@ -225,6 +290,41 @@ export default {
 			forEach(this.$children, child => {
 				child.clearValidationErrors();
 			});
+		},
+
+		setActiveStep(index) {
+			if (this.canStepTo >= index) {
+				this.activeStep = index;
+			}
+		},
+
+		isStepValid(index) {
+			const fields = [];
+			for (let i = 0; i < this.schema.steps[index].fields.length; i++) {
+				fields.push(this.schema.steps[index].fields[i].model);
+			}
+
+			for (let i = 0; i < this.$children.length; i++) {
+				const child = this.$children[i];
+				if (fields.indexOf(child.field.model) !== -1) {
+					if (isFunction(child.validate)) {
+						if (child.validate().length > 0) {
+							return false;
+						}
+					}
+				}
+			}
+
+			return true;
+		},
+
+		goToNextStep(index) {
+			if (this.isStepValid(index)) {
+				if (index >= this.canStepTo && index !== this.steps.length - 1) {
+					this.canStepTo = index + 1;
+				}
+				this.setActiveStep(this.canStepTo);
+			}
 		},
 	}
 };
