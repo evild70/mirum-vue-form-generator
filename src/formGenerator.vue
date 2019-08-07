@@ -294,7 +294,9 @@ export default {
 
 		setActiveStep(index) {
 			if (this.canStepTo >= index) {
-				this.activeStep = index;
+				if (this.isStepValid(this.activeStep)) {
+					this.activeStep = index;
+				}
 			}
 		},
 
