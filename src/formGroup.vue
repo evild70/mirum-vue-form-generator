@@ -144,8 +144,21 @@ export default {
 			if (this.$refs.child) {
 				return this.$refs.child.clearValidationErrors();
 			}
+		},
+	},
+	mounted() {
+		// Re-run validation if this is a visibility replacement field in a stepped form
+		if (typeof this.$parent.fieldToStepMap[this.field.model] === "number") {
+			this.validate();
 		}
-	}
+	},
+
+	beforeDestroy() {
+		if (this.field.hasNoReplacement) {
+			this.clearValidationErrors();
+			this.$emit("validated", true, [], this.$refs.child);
+		}
+	},
 };
 </script>
 <style lang="scss">

@@ -228,5 +228,5 @@ export default {
 		formatValueToModel(value) {
 			return value;
 		}
-	}
+	},
 };
