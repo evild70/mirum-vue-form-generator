@@ -42,8 +42,9 @@
 				>
 					<a
 						href="#"
-						:class="{ 'c-tab__tab': true, 'active': activeStep === stepindex, 'disabled': stepindex > canStepTo }"
+						:class="getStepTabClasses(step, stepindex)"
 						role="tab"
+						:aria-description="getStepTabDescription(step, stepindex)"
 						@click.prevent="setActiveStep(stepindex)"
 					>
 						{{ step.title }}
@@ -69,18 +70,10 @@
 							:options="options"
 							@validated="onFieldValidated"
 							@model-updated="onModelUpdated"
-							:key="index">
+							:key="index"
+							:ref="`step_${stepindex}`">
 						</form-group>
 					</template>
-					<button
-						v-if="stepindex !== steps.length - 1"
-						class="c-button c-button--primary"
-						type="button"
-						name="nextStep"
-						@click="goToNextStep(stepindex)"
-					>
-						{{ schema.nextButtonText || 'Next' }}
-					</button>
 				</fieldset>
 			</div>
 		</template>
@@ -138,7 +131,9 @@ export default {
 			vfg: this,
 			activeStep: 0,
 			canStepTo: 0,
-			errors: [] // Validation errors
+			errors: [], // Validation errors
+			fieldToStepMap: {},
+			stepValid: [],
 		};
 	},
 
@@ -195,6 +190,15 @@ export default {
 		}
 	},
 
+	created() {
+		// Set default step validation
+		if (this.schema.steps) {
+			for (let i = 0; i < this.schema.steps.length; i++) {
+				this.stepValid.push(true);
+			}
+		}
+	},
+
 	mounted() {
 		this.$nextTick(() => {
 			if (this.model) {
@@ -218,10 +222,59 @@ export default {
 			return field.visible;
 		},
 
+		setFieldToStepMap(fieldName) {
+			for (let i = 0; i < this.schema.steps.length; i++) {
+				const step = this.schema.steps[i];
+				for (let j = 0; j < step.fields.length; j++) {
+					if (fieldName === step.fields[j].model) {
+						this.fieldToStepMap[fieldName] = i;
+						return i;
+					}
+				}
+			}
+			return NaN;
+		},
+
+		handleStepValidation(field, isValid) {
+			// Set this no matter what so we can use it as a "hasBeenModified" check
+			let stepIndex = this.fieldToStepMap[field.schema.model];
+			if (typeof stepIndex !== "number") {
+				stepIndex = this.setFieldToStepMap(field.schema.model);
+			}
+
+			// If no errors exist, set all to valid
+			if (this.errors.length === 0) {
+				for (let i = 0; i < this.stepValid.length; i++) {
+					this.stepValid[i] = true;
+				}
+			} else {
+				const isStepValid = this.stepValid[stepIndex];
+				if (isStepValid !== isValid) {
+					if (isStepValid) {
+						// The step is now invalid
+						this.stepValid[stepIndex] = false;
+					} else {
+						// Check if there are any other errors in this step.
+						for (let i = 0; i < this.errors.length; i++) {
+							const name = this.errors[i].field.model;
+							if (typeof this.fieldToStepMap[name] === "number") {
+								if (this.fieldToStepMap[name] === stepIndex) {
+									// There was another error in this step. Still invalid.
+									return;
+								}
+							}
+						}
+						// There were no errors in this step.
+						this.stepValid[stepIndex] = true;
+					}
+				}
+			}
+		},
+
 		// Child field executed validation
 		onFieldValidated(res, errors, field) {
-			// Remove old errors for this field
-			this.errors = this.errors.filter(e => e.field !== field.schema);
+			// Remove old errors for this model name
+			this.errors = this.errors.filter(e => e.field.model !== field.schema.model);
 
 			if (!res && errors && errors.length > 0) {
 				// Add errors with this field
@@ -235,6 +288,10 @@ export default {
 
 			let isValid = this.errors.length === 0;
 			this.$emit("validated", isValid, this.errors, this);
+
+			if (this.schema.steps && field.schema.model) {
+				this.handleStepValidation(field, errors.length === 0);
+			}
 		},
 
 		onModelUpdated(newVal, schema) {
@@ -292,40 +349,75 @@ export default {
 			});
 		},
 
-		setActiveStep(index) {
-			if (this.canStepTo >= index) {
-				if (this.isStepValid(this.activeStep)) {
-					this.activeStep = index;
-				}
-			}
+		getStepTabClasses(step, index) {
+			const hasErrors = !this.stepValid[index];
+			const baseClasses = {
+				"c-tab__tab": true,
+				[objGet(this.options, "validationErrorClass", "error")]: hasErrors,
+				[objGet(this.options, "validationSuccessClass", "valid")]: !hasErrors,
+				disabled: index > this.canStepTo,
+				active: index === this.activeStep,
+			};
+			return baseClasses;
 		},
 
-		isStepValid(index) {
-			const fields = [];
-			for (let i = 0; i < this.schema.steps[index].fields.length; i++) {
-				fields.push(this.schema.steps[index].fields[i].model);
+		getStepTabDescription(step, index) {
+			const description = [];
+
+			if (index > this.canStepTo) {
+				description.push(this.schema.stepDisabledText || "You must complete the previous steps before you can access this one.");
 			}
 
-			for (let i = 0; i < this.$children.length; i++) {
-				const child = this.$children[i];
-				if (fields.indexOf(child.field.model) !== -1) {
-					if (isFunction(child.validate)) {
-						if (child.validate().length > 0) {
-							return false;
-						}
+			if (!this.stepValid[index]) {
+				description.push(this.schema.stepErrorText || "There are errors present on this step.");
+			}
+
+			if (description.length > 0) {
+				return description.join(" ");
+			}
+			return false;
+		},
+
+		/**
+		 * Checks each field in the step for validitiy.
+		 * We don't immediately return on the first false validation so that we can
+		 * mimic submitting the current step.
+		 *
+		 * @param {Number} index The step index.
+		 *
+		 * @returns {Boolean} The validity of the step.
+		 */
+		validateStep(index) {
+			let isValid = true;
+			for (let i = 0; i < this.$refs[`step_${index}`].length; i++) {
+				const field = this.$refs[`step_${index}`][i];
+				if (isFunction(field.validate)) {
+					if (field.validate().length > 0) {
+						isValid = false;
 					}
 				}
 			}
 
-			return true;
+			if (!isValid) {
+				this.$emit("steperror");
+			}
+			return isValid;
 		},
 
-		goToNextStep(index) {
-			if (this.isStepValid(index)) {
-				if (index >= this.canStepTo && index !== this.steps.length - 1) {
-					this.canStepTo = index + 1;
+		setActiveStep(index) {
+			this.activeStep = index;
+		},
+
+		goToStep(index) {
+			if (index > this.activeStep) {
+				if (this.validateStep(this.activeStep)) {
+					if (index === this.canStepTo + 1) {
+						this.canStepTo = index;
+					}
+					this.setActiveStep(index);
 				}
-				this.setActiveStep(this.canStepTo);
+			} else if (index <= this.canStepTo && index !== this.activeStep) {
+				this.setActiveStep(index);
 			}
 		},
 	}
