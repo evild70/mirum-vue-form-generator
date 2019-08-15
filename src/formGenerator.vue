@@ -406,6 +406,7 @@ export default {
 
 		setActiveStep(index) {
 			this.activeStep = index;
+			this.$emit("gotostep", index);
 		},
 
 		goToStep(index) {
