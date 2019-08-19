@@ -1,24 +1,11 @@
 <template>
 	<div class="form-group" :class="getFieldRowClasses(field)">
-		<a v-if="field.tooltip"
-			class="u-reset-button u-color-blue-digital"
-			tabindex="0"
-			role="button"
-			data-tooltip=""
-			data-toggle="popover"
-			data-trigger="focus"
-			data-placement="top"
-			aria-label="Tool tip"
-			:title="field.tooltip.header"
-			:data-content="field.tooltip.body"
-			:data-has-image="field.tooltip.hasImage"
-		>
-			<span class="o-svg-icon o-svg-icon--xl">
-				<svg viewBox="0, 0, 24, 24" focusable="false" role="presentation" shape-rendering="geometricPrecision">
-					<path d="M12,1.208 C17.957,1.208 22.792,6.043 22.792,12 C22.792,17.957 17.957,22.792 12,22.792 C6.043,22.792 1.208,17.957 1.208,12 C1.208,6.043 6.043,1.208 12,1.208 z M13.079,10.921 L10.921,10.921 L10.921,17.396 L13.079,17.396 L13.079,10.921 z M12,6.354 C11.266,6.354 10.671,6.949 10.671,7.683 C10.671,8.417 11.266,9.012 12,9.012 C12.734,9.012 13.329,8.417 13.329,7.683 C13.329,6.949 12.734,6.354 12,6.354 z" fill="currentColor" />
-				</svg>
-			</span>
-		</a>
+		<Tooltip
+			v-if="hasTooltip(field)"
+			:header="field.tooltip.header"
+			:body="field.tooltip.body"
+			:hasImage="field.tooltip.hasImage"
+		/>
 		<label v-if="fieldTypeHasLabel(field)" :for="getFieldID(field)" :class="field.labelClasses">
 			<span v-html="field.label"></span>
 		</label>
@@ -55,11 +42,12 @@
 import { get as objGet, isNil, isFunction } from "lodash";
 import { slugifyFormID } from "./utils/schema";
 import formMixin from "./formMixin.js";
+import Tooltip from "./Tooltip.vue";
 import fieldComponents from "./utils/fieldsLoader.js";
 
 export default {
 	name: "form-group",
-	components: fieldComponents,
+	components: { ...fieldComponents, Tooltip },
 	mixins: [formMixin],
 	props: {
 		vfg: {
@@ -144,6 +132,20 @@ export default {
 			if (this.$refs.child) {
 				return this.$refs.child.clearValidationErrors();
 			}
+		},
+		hasTooltip(field) {
+			if (!field.tooltip) {
+				return false;
+			}
+			const blackListedTypes = [
+				"dtlradio",
+				"dtlcheckbox",
+				"dtlcheckboxgroup"
+			];
+			if (blackListedTypes.indexOf(field.type) !== -1) {
+				return false;
+			}
+			return true;
 		},
 	},
 	mounted() {

@@ -3,6 +3,7 @@ const schema = require("./utils/schema.js");
 const validators = require("./utils/validators.js").default;
 const fieldComponents = require("./utils/fieldsLoader").default;
 const abstractField = require("./fields/abstractField").default;
+const tooltip = require("./Tooltip.vue").default;
 const install = (Vue, options) => {
 	Vue.component("VueFormGenerator", module.exports.component);
 	if (options && options.validators) {
@@ -20,5 +21,6 @@ module.exports = {
 	validators,
 	abstractField,
 	fieldComponents,
+	tooltip,
 	install
 };
