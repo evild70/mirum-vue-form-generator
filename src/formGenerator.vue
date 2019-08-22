@@ -46,6 +46,7 @@
 						role="tab"
 						:aria-description="getStepTabDescription(step, stepindex)"
 						@click.prevent="setActiveStep(stepindex)"
+						ref="stepTab"
 					>
 						{{ step.title }}
 					</a>
@@ -407,6 +408,7 @@ export default {
 		setActiveStep(index) {
 			this.activeStep = index;
 			this.$emit("gotostep", index);
+			this.$refs.stepTab[index].focus();
 		},
 
 		goToStep(index) {
