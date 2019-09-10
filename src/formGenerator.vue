@@ -46,6 +46,7 @@
 						role="tab"
 						:aria-description="getStepTabDescription(step, stepindex)"
 						@click.prevent="setActiveStep(stepindex)"
+						:tabindex="canStepTo >= stepindex ? '0' : '-1'"
 						ref="stepTab"
 					>
 						{{ step.title }}
@@ -396,13 +397,11 @@ export default {
 				if (isFunction(field.validate)) {
 					const validation = field.validate();
 					if (Array.isArray(validation)) {
-						console.log('reg');
 						if (validation.length > 0) {
 							isValid = false;
 						}
 					} else {
 						const checkValidation = (res) => {
-							console.log(res.length > 0);
 							if (res.length > 0) {
 								isValid = false;
 								this.setActiveStep(this.prevStep, false);
@@ -434,8 +433,6 @@ export default {
 
 		goToStep(index) {
 			if (index > this.activeStep) {
-				console.log(this.validateStep(this.activeStep));
-				console.log('---');
 				if (this.validateStep(this.activeStep)) {
 					if (index === this.canStepTo + 1) {
 						this.canStepTo = index;
