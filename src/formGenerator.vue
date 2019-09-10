@@ -132,6 +132,7 @@ export default {
 			vfg: this,
 			activeStep: 0,
 			canStepTo: 0,
+			prevStep: 0, // For async validation
 			errors: [], // Validation errors
 			fieldToStepMap: {},
 			stepValid: [],
@@ -393,8 +394,23 @@ export default {
 			for (let i = 0; i < this.$refs[`step_${index}`].length; i++) {
 				const field = this.$refs[`step_${index}`][i];
 				if (isFunction(field.validate)) {
-					if (field.validate().length > 0) {
-						isValid = false;
+					const validation = field.validate();
+					if (Array.isArray(validation)) {
+						if (validation.length > 0) {
+							isValid = false;
+						}
+					} else {
+						const checkValidation = (res) => {
+							if (res.length > 0) {
+								isValid = false;
+								this.setActiveStep(this.prevStep);
+								this.canStepTo = this.prevStep;
+								this.$emit("steperror");
+								return;
+							}
+						};
+
+						validation.then(checkValidation);
 					}
 				}
 			}
@@ -406,6 +422,7 @@ export default {
 		},
 
 		setActiveStep(index) {
+			this.prevStep = this.activeStep;
 			this.activeStep = index;
 			this.$emit("gotostep", index);
 			this.$refs.stepTab[index].focus();
