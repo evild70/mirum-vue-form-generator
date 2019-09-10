@@ -396,14 +396,16 @@ export default {
 				if (isFunction(field.validate)) {
 					const validation = field.validate();
 					if (Array.isArray(validation)) {
+						console.log('reg');
 						if (validation.length > 0) {
 							isValid = false;
 						}
 					} else {
 						const checkValidation = (res) => {
+							console.log(res.length > 0);
 							if (res.length > 0) {
 								isValid = false;
-								this.setActiveStep(this.prevStep);
+								this.setActiveStep(this.prevStep, false);
 								this.canStepTo = this.prevStep;
 								this.$emit("steperror");
 								return;
@@ -421,8 +423,10 @@ export default {
 			return isValid;
 		},
 
-		setActiveStep(index) {
-			this.prevStep = this.activeStep;
+		setActiveStep(index, isUserAction = true) {
+			if (isUserAction) {
+				this.prevStep = this.activeStep;
+			}
 			this.activeStep = index;
 			this.$emit("gotostep", index);
 			this.$refs.stepTab[index].focus();
@@ -430,6 +434,8 @@ export default {
 
 		goToStep(index) {
 			if (index > this.activeStep) {
+				console.log(this.validateStep(this.activeStep));
+				console.log('---');
 				if (this.validateStep(this.activeStep)) {
 					if (index === this.canStepTo + 1) {
 						this.canStepTo = index;
