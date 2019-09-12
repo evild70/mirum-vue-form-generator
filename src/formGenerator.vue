@@ -133,7 +133,7 @@ export default {
 			vfg: this,
 			activeStep: 0,
 			canStepTo: 0,
-			prevStep: 0, // For async validation
+			nextStep: 0, // For async validation
 			errors: [], // Validation errors
 			fieldToStepMap: {},
 			stepValid: [],
@@ -381,6 +381,24 @@ export default {
 			return false;
 		},
 
+		handleAsyncValidateStep(res) {
+			this.stepFieldsToCheck -= 1;
+			if (res.length > 0) {
+				this.canStepTo = this.activeStep;
+				this.$emit("steperror");
+				this.stepIsValid = false;
+			}
+
+			if (this.stepFieldsToCheck === 0) {
+				if (this.stepIsValid) {
+					if (this.nextStep > this.canStepTo) {
+						this.canStepTo += this.nextStep;
+					}
+					this.setActiveStep(this.nextStep);
+				}
+			}
+		},
+
 		/**
 		 * Checks each field in the step for validitiy.
 		 * We don't immediately return on the first false validation so that we can
@@ -391,29 +409,37 @@ export default {
 		 * @returns {Boolean} The validity of the step.
 		 */
 		validateStep(index) {
+			const isAsync = objGet(this.formOptions, "validateAsync", false);
+			if (isAsync) {
+				// Don't perform more than one check at a time.
+				if (this.stepFieldsToCheck > 0) {
+					return false;
+				}
+				this.stepFieldsToCheck = this.$refs[`step_${index}`].length;
+			}
+
 			let isValid = true;
+			// TODO: Check if the settings have this as async
+			// If so set a counter for items to check
+			// Set this.stepIsValid to true
+			// Check if step fields to check is above 0 && return if true
 			for (let i = 0; i < this.$refs[`step_${index}`].length; i++) {
 				const field = this.$refs[`step_${index}`][i];
 				if (isFunction(field.validate)) {
 					const validation = field.validate();
-					if (Array.isArray(validation)) {
+					if (!isAsync) {
 						if (validation.length > 0) {
 							isValid = false;
 						}
 					} else {
-						const checkValidation = (res) => {
-							if (res.length > 0) {
-								isValid = false;
-								this.setActiveStep(this.prevStep, false);
-								this.canStepTo = this.prevStep;
-								this.$emit("steperror");
-								return;
-							}
-						};
-
-						validation.then(checkValidation);
+						validation.then(this.handleAsyncValidateStep);
 					}
 				}
+			}
+
+			// We return false initially then manually run the step update in the handleAsync method
+			if (isAsync) {
+				return false;
 			}
 
 			if (!isValid) {
@@ -422,10 +448,7 @@ export default {
 			return isValid;
 		},
 
-		setActiveStep(index, isUserAction = true) {
-			if (isUserAction) {
-				this.prevStep = this.activeStep;
-			}
+		setActiveStep(index) {
 			this.activeStep = index;
 			this.$emit("gotostep", index);
 			this.$refs.stepTab[index].focus();
@@ -433,6 +456,7 @@ export default {
 
 		goToStep(index) {
 			if (index > this.activeStep) {
+				this.nextStep = index;
 				if (this.validateStep(this.activeStep)) {
 					if (index === this.canStepTo + 1) {
 						this.canStepTo = index;
