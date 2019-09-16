@@ -409,7 +409,7 @@ export default {
 		 * @returns {Boolean} The validity of the step.
 		 */
 		validateStep(index) {
-			const isAsync = objGet(this.formOptions, "validateAsync", false);
+			const isAsync = objGet(this.options, "validateAsync", false);
 			if (isAsync) {
 				// Don't perform more than one check at a time.
 				if (this.stepFieldsToCheck > 0) {
@@ -419,10 +419,6 @@ export default {
 			}
 
 			let isValid = true;
-			// TODO: Check if the settings have this as async
-			// If so set a counter for items to check
-			// Set this.stepIsValid to true
-			// Check if step fields to check is above 0 && return if true
 			for (let i = 0; i < this.$refs[`step_${index}`].length; i++) {
 				const field = this.$refs[`step_${index}`][i];
 				if (isFunction(field.validate)) {
