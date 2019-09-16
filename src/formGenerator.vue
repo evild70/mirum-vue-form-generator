@@ -137,6 +137,7 @@ export default {
 			errors: [], // Validation errors
 			fieldToStepMap: {},
 			stepValid: [],
+			stepIsValid: true,
 		};
 	},
 
@@ -382,6 +383,7 @@ export default {
 		},
 
 		handleAsyncValidateStep(res) {
+			console.log(this.stepFieldsToCheck);
 			this.stepFieldsToCheck -= 1;
 			if (res.length > 0) {
 				this.canStepTo = this.activeStep;
@@ -416,6 +418,7 @@ export default {
 					return false;
 				}
 				this.stepFieldsToCheck = this.$refs[`step_${index}`].length;
+				this.stepIsValid = true;
 			}
 
 			let isValid = true;
