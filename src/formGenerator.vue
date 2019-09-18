@@ -45,7 +45,7 @@
 						:class="getStepTabClasses(step, stepindex)"
 						role="tab"
 						:aria-description="getStepTabDescription(step, stepindex)"
-						@click.prevent="setActiveStep(stepindex)"
+						@click.prevent="goToStep(stepindex)"
 						:tabindex="canStepTo >= stepindex ? '0' : '-1'"
 						ref="stepTab"
 					>
