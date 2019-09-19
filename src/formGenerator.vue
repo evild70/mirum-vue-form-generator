@@ -34,7 +34,7 @@
 		</template>
 		<!-- Steps -->
 		<template v-if="steps">
-			<ul class="c-tab c-tab--step">
+			<ul class="c-tab c-tab--step" role="tablist">
 				<li
 					v-for="(step, stepindex) in steps"
 					:key="stepindex"
@@ -44,7 +44,7 @@
 						href="#"
 						:class="getStepTabClasses(step, stepindex)"
 						role="tab"
-						:aria-description="getStepTabDescription(step, stepindex)"
+						:aria-label="getStepTabDescription(step, stepindex)"
 						@click.prevent="goToStep(stepindex)"
 						:tabindex="canStepTo >= stepindex ? '0' : '-1'"
 						ref="stepTab"
